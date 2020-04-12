@@ -1,0 +1,156 @@
+{% extends 'dashboard/base.html' %}
+{% block tables %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col w-50">
+			<h1>Seizure</h1>
+			<div class="table-responsive">
+			  <table class="table table-bordered table-hover">
+			    <thead>
+				    <tr>
+				    {% for col in columns %}
+				     	<th scope="col">{{ col }}</th>
+				    {% endfor %}
+				    </tr>
+				</thead>
+				<tbody>
+				 	{% for row in seizureFt %}
+					 	<tr id="row{{ forloop.counter0 }}" class="seizurerow">
+					 		{% for x in row %}
+							    <td id="{{ forloop.parentloop.counter0 }}">{{ x }}</td>
+					 		{% endfor %}
+					 	</tr>
+				 	{% endfor %}				    
+				</tbody>
+			  </table>
+			</div>
+		</div>
+		<div class="col w-50">
+			<h1>Non Seizure</h1>
+			<div class="table-responsive">
+			  <table class="table table-bordered table-hover">
+			    <thead>
+				    <tr>
+				    {% for col in columns %}
+				     	<th scope="col">{{ col }}</th>
+				    {% endfor %}
+				    </tr>
+				</thead>
+				<tbody>
+				 	{% for row in nonSeizureFt %}
+					 	<tr id="row{{ forloop.counter0 }}" class="nonseizurerow">
+					 		{% for x in row %}
+							    <td id="{{ forloop.parentloop.counter0 }}">{{ x }}</td>
+					 		{% endfor %}
+					 	</tr>
+				 	{% endfor %}				    
+				</tbody>
+			  </table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block plot %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<div class="container-fluid">
+  <div class="row">
+    <div id="seizureplot" class="col-sm-6">
+    	{{ plotHtmlSeizureFt | safe }}
+    </div>
+    <div id="nonseizureplot" class="col-sm-6">
+      {{ plotHtmlNonSeizureFt | safe }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+	const navBeforeFtItem = document.getElementById('beforeft');
+	const navAfterFtItem = document.getElementById('afterft');
+	navBeforeFtItem.classList.remove("active");
+	navAfterFtItem.classList.add("active");
+	var setInnerHTML = function(elm, html) {
+		elm.innerHTML = html;
+		Array.from(elm.querySelectorAll("script")).forEach( oldScript => {
+			const newScript = document.createElement("script");
+			Array.from(oldScript.attributes)
+			.forEach( attr => newScript.setAttribute(attr.name, attr.value) );
+			newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+			oldScript.parentNode.replaceChild(newScript, oldScript);
+		});
+	}
+	function getCookie(name) {
+		    var cookieValue = null;
+		    if (document.cookie && document.cookie !== '') {
+		        var cookies = document.cookie.split(';');
+		        for (var i = 0; i < cookies.length; i++) {
+		            var cookie = cookies[i].trim();
+		            // Does this cookie string begin with the name we want?
+		            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		                break;
+		            }
+		        }
+		    }
+		    return cookieValue;
+	}
+	var csrftoken = getCookie('csrftoken');	
+	console.log("hello!!");
+	const seizureInnerHtml = document.getElementById('seizureplot');
+	const nonSeizureInnerHtml = document.getElementById('nonseizureplot');
+	const elements = document.getElementsByClassName("seizurerow");
+	for (element of elements) {
+		element.addEventListener("click", (e) => {
+			e.preventDefault();
+			console.log("click!!")
+			console.log(e.target.id);
+			const obj = {
+				id: e.target.id
+			};
+			const xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					console.log("yay");
+					res = JSON.parse(this.response);
+					console.log(typeof res['html']);
+					setInnerHTML(seizureInnerHtml, res['html']);
+				}
+			};
+			xhttp.open("POST", "{% url 'requestHtmlSeizureFt' %}", true);
+			xhttp.setRequestHeader("Content-type", "application/json");
+			xhttp.setRequestHeader("X-CSRFToken", csrftoken);
+			console.log(JSON.stringify(obj));
+			xhttp.send(JSON.stringify(obj));
+		});
+	}
+	const anotherElements = document.getElementsByClassName("nonseizurerow");
+	for (element of anotherElements) {
+		element.addEventListener("click", (e) => {
+			e.preventDefault();
+			console.log("click!!")
+			console.log(e.target.id);
+			const obj = {
+				id: e.target.id
+			};
+			const xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					console.log("yay");
+					res = JSON.parse(this.response);
+					console.log(typeof res['html']);
+					setInnerHTML(nonSeizureInnerHtml, res['html']);
+					// seizureInnerHtml.innerHTML = `${res['html']}`;
+				}
+			};
+			xhttp.open("POST", "{% url 'requestHtmlNonSeizureFt' %}", true);
+			xhttp.setRequestHeader("Content-type", "application/json");
+			xhttp.setRequestHeader("X-CSRFToken", csrftoken);
+			console.log(JSON.stringify(obj));
+			xhttp.send(JSON.stringify(obj));
+		});
+	}
+</script>
+{% endblock %}
