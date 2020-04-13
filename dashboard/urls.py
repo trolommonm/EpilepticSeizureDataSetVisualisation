@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.beforeFT, name='beforeFT'),
     path('beforeFT', views.beforeFT, name='beforeFT'),
     path('afterFT', views.afterFT, name='afterFT'),
     path('requestHtmlSeizure', views.requestHtmlSeizure, name='requestHtmlSeizure'),
