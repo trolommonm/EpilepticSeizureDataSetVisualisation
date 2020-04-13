@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from dashboard.plot import getGraph, getAnotherGraph
 
+import os
+print(os.getcwd())
+
 data = pd.read_csv('data.csv')
 data["CLASS"] = data['y'] == 1
 data["CLASS"] = data["CLASS"].astype('int')

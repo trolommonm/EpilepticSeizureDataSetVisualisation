@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from dashboard.Data import getSeizureData, getNonSeizureData, getColumns, getSeizureHtml, getNonSeizureHtml
 from dashboard.Data import getFTColumns, getSeizureFTData, getNonSeizureFtData, getSeizureFtHtml, getNonSeizureFtHtml
 import json
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
@@ -40,6 +41,7 @@ def afterFT(request):
 
 	return render(request, 'dashboard/afterft.html', context)
 
+@csrf_exempt 
 def requestHtmlSeizure(request):
 	if request.method == 'POST':
 		jsonStr = request.body.decode("utf-8")
@@ -47,6 +49,7 @@ def requestHtmlSeizure(request):
 		x = getSeizureHtml(columns, seizureData[int(data['id'])])
 		return JsonResponse({'html': x}, status=200)
 
+@csrf_exempt 
 def requestHtmlNonSeizure(request):
 	if request.method == 'POST':
 		jsonStr = request.body.decode("utf-8")
@@ -54,6 +57,7 @@ def requestHtmlNonSeizure(request):
 		x = getNonSeizureHtml(columns, nonSeizureData[int(data['id'])])
 		return JsonResponse({'html': x}, status=200)
 
+@csrf_exempt 
 def requestHtmlSeizureFt(request):
 	if request.method == 'POST':
 		jsonStr = request.body.decode("utf-8")
@@ -61,6 +65,7 @@ def requestHtmlSeizureFt(request):
 		x = getSeizureFtHtml(seizureFtData[int(data['id'])])
 		return JsonResponse({'html': x}, status=200)
 
+@csrf_exempt 
 def requestHtmlNonSeizureFt(request):
 	if request.method == 'POST':
 		jsonStr = request.body.decode("utf-8")
